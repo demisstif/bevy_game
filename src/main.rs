@@ -32,8 +32,13 @@ fn add_people(mut commands: Commands) {
         .spawn((Person, Name("Zayna Nieves".to_string())));
 }
 
-fn greet_people(_person: &Person, name: &Name) {
-    println!("hello {}!", name.0);
+struct GreetTimer(Timer);
+
+fn greet_people(time: Res<Time>, mut timer: ResMut<GreetTimer>, _person: &Person, name: &Name) {
+    timer.0.tick(time.delta_seconds);
+    if timer.0.finished {
+        println!("hello {}!", name.0);
+    }
 }
 
 pub struct HelloPlugin;
@@ -41,9 +46,10 @@ pub struct HelloPlugin;
 impl Plugin for HelloPlugin {
     // multi ecs -> plugin 
     fn build(&self, app: &mut AppBuilder) {
-        app.add_startup_system(add_people.system())
+        app.add_resource(GreetTimer(Timer::from_seconds(2.0, true)))
+        .add_startup_system(add_people.system())
         // add_system() function adds the system to App's Schedule
-        .add_system(hello_world.system())
+        // .add_system(hello_world.system())
         // The parameters we pass in to a "system function" define what entities the system runs on. In this case, 
         // greet_people will run on all entities with the Person and Name component.
         .add_system(greet_people.system());
