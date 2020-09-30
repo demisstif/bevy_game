@@ -34,10 +34,12 @@ fn add_people(mut commands: Commands) {
 
 struct GreetTimer(Timer);
 
-fn greet_people(time: Res<Time>, mut timer: ResMut<GreetTimer>, _person: &Person, name: &Name) {
+fn greet_people(time: Res<Time>, mut timer: ResMut<GreetTimer>, mut query: Query<(&Person, &Name)>) {
     timer.0.tick(time.delta_seconds);
     if timer.0.finished {
-        println!("hello {}!", name.0);
+        for (_person, name) in &mut query.iter() {
+            println!("hello {}!", name.0);
+        }
     }
 }
 
